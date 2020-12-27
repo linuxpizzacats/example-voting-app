@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    tools {
+      maven 'Maven 3.6.1'
+    }
+
+    stages {
+        stage('build') {
+            steps {
+                echo 'Compiler worker'
+                dir('worker') {
+                  sh 'mvn compile'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                echo 'Running unit test on worker app'
+            }
+        }
+        stage('package') {
+            steps {
+                echo 'Package worker app'
+            }
+        }
+    }
+    post{
+        always{
+            echo 'pipeline for worker app has finished.'
+        }
+    }
+}
