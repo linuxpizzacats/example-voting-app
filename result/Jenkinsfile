@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    tools {
+      maven 'node-js8.9.0'
+    }
+
+    stages {
+        stage('build') {
+            when {
+              changeset '**/result/**'
+            }
+            steps {
+                echo 'Building result app'
+                dir('result') {
+                  sh 'npm install'
+                  sh 'npm ls'
+                }
+            }
+        }
+        stage('test') {
+            when {
+              changeset '**/result/**'
+            }
+            steps {
+                echo 'Running unit test on result app'
+                dir('result') {
+                  sh 'npm install'
+                  sh 'npm test'
+                }
+            }
+        }
+    }
+    post{
+        always{
+	    slackSend (channel: "lfs261", message: "result-app: Build Started - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
+            echo 'Pipeline for result app has finished.'
+        }
+	failure{
+	    slackSend (channel: "lfs261", message: "result-app: Build Failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
+	}
+	success{
+	    slackSend (channel: "lfs261", message: "result-app: Build Success - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)")
+	}
+    }
+}
